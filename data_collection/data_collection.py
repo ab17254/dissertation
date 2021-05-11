@@ -36,5 +36,8 @@ def scrape():
 if __name__ == '__main__':
     csvFile = open('twitter_data.csv', 'a')  # creates a file in which you want to store the data.
     csvWriter = csv.writer(csvFile)
+    csvWriter.writerow(['tweet_date', 'tweet_content', 'tweet_id', 'tweet_likes', 'tweet_replies', 'tweet_retweets',
+                        'tweet_quotes', 'user_username', 'user_id', 'user_followers', 'user_friends', 'user_statuses',
+                        'user_verified'])
     scrape()
     print("tweets collected: " + str(len(list(csv.reader(open('twitter_data.csv')))) / 2))
