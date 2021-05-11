@@ -20,13 +20,15 @@ with open('twitter_users.txt', 'r') as f:
         users.append(account)
         f.close()
 
+query = '#GE2017 OR #GE17 OR #GeneralElection OR #GeneralElection2017 OR #Election2017'
+
 
 def scrape():
     for user in users:
         search = ' from:' + '"{}"'.format(user)
         print(user)
-        for i, tweet in enumerate(sntwitter.TwitterSearchScraper('Corbyn' + search + 'since:2017-05-04 '
-                                                                                     'until:2017-06-04').get_items()):
+        for i, tweet in enumerate(sntwitter.TwitterSearchScraper(query + search + 'since:2017-05-04 '
+                                                                                  'until:2017-06-04').get_items()):
             csvWriter.writerow([tweet.date, tweet.content.encode('utf-8'), tweet.id, tweet.likeCount, tweet.replyCount,
                                 tweet.retweetCount, tweet.quoteCount, tweet.user.username, tweet.user.id,
                                 tweet.user.followersCount, tweet.user.friendsCount, tweet.user.statusesCount,
