@@ -25,7 +25,7 @@ def scrape():
     for user in users:
         search = ' from:' + '"{}"'.format(user)
         print(user)
-        for i, tweet in enumerate(sntwitter.TwitterSearchScraper('Covid OR pandemic' + search).get_items()):
+        for i, tweet in enumerate(sntwitter.TwitterSearchScraper('Corbyn' + search + ' since:2017-05-04 until:2017-06-04').get_items()):
             csvWriter.writerow([tweet.date, tweet.content.encode('utf-8'), tweet.id,tweet.user.username, tweet.user.id])
 
 
@@ -33,5 +33,6 @@ if __name__ == '__main__':
     csvFile = open('twitter_data.csv', 'a')  # creates a file in which you want to store the data.
     csvWriter = csv.writer(csvFile)
     scrape()
+    print("tweets collected: " + str(len(list(csv.reader(open('twitter_data.csv'))))/2))
 
 
