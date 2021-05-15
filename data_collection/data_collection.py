@@ -1,5 +1,6 @@
 #!/usr/bin/env python3.8
 import csv
+import sys
 import tweepy
 import snscrape.modules.twitter as sntwitter
 
@@ -61,25 +62,53 @@ query_2 = '#BBCQT OR #marr OR #Preston OR #r4today OR #NewsNight OR #BBC OR ' \
 queries = [query_1, query_2]
 
 
-def scrape():
+def scrape_from_list():
     for user in users:
         search = ' from:' + '"{}"'.format(user)
         print(user)
         for query in queries:
-            for i, tweet in enumerate(sntwitter.TwitterSearchScraper(query + search + 'since:2017-05-04 '
-                                                                                      'until:2017-06-04').get_items()):
-                csvWriter.writerow(
+            for i, tweet in enumerate(sntwitter.TwitterSearchScraper(query + search + 'since:2017-04-18 '
+                                                                                      'until:2017-06-09').get_items()):
+                political_writer.writerow(
                     [tweet.date, tweet.content.encode('utf-8'), tweet.id, tweet.likeCount, tweet.replyCount,
                      tweet.retweetCount, tweet.quoteCount, tweet.user.username, tweet.user.id,
                      tweet.user.followersCount, tweet.user.friendsCount, tweet.user.statusesCount,
                      tweet.user.verified])
 
 
+def scrape_all():
+    for query in queries:
+        for i, tweet in enumerate(sntwitter.TwitterSearchScraper(query + 'lang:en' + 'since:2017-04-18 '
+                                                                                     'until:2017-06-09').get_items()):
+            all_writer.writerow(
+                [tweet.date, tweet.content.encode('utf-8'), tweet.id, tweet.likeCount, tweet.replyCount,
+                 tweet.retweetCount, tweet.quoteCount, tweet.user.username, tweet.user.id,
+                 tweet.user.followersCount, tweet.user.friendsCount, tweet.user.statusesCount,
+                 tweet.user.verified])
+
+
 if __name__ == '__main__':
-    csvFile = open('twitter_data.csv', 'w')  # creates a file in which you want to store the data.
-    csvWriter = csv.writer(csvFile)
-    csvWriter.writerow(['tweet_date', 'tweet_content', 'tweet_id', 'tweet_likes', 'tweet_replies', 'tweet_retweets',
-                        'tweet_quotes', 'user_username', 'user_id', 'user_followers', 'user_friends', 'user_statuses',
-                        'user_verified'])
-    scrape()
-    print("tweets collected: " + str(len(list(csv.reader(open('twitter_data.csv')))) / 2))
+    type = sys.argv[1]
+    if type == 'pol':
+        political_user_file = open('political_twitter_data.csv',
+                                   'w')  # creates a file in which you want to store the data.
+        political_writer = csv.writer(political_user_file)
+        political_writer.writerow(
+            ['tweet_date', 'tweet_content', 'tweet_id', 'tweet_likes', 'tweet_replies', 'tweet_retweets',
+             'tweet_quotes', 'user_username', 'user_id', 'user_followers', 'user_friends', 'user_statuses',
+             'user_verified'])
+        scrape_from_list()
+        print("tweets collected: " + str(len(list(csv.reader(open('political_twitter_data.csv')))) / 2))
+
+    elif type == 'all':
+        all_user_file = open('all_twitter_data.csv', 'w')
+        all_writer = csv.writer(all_user_file)
+        all_writer.writerow(
+            ['tweet_date', 'tweet_content', 'tweet_id', 'tweet_likes', 'tweet_replies', 'tweet_retweets',
+             'tweet_quotes', 'user_username', 'user_id', 'user_followers', 'user_friends', 'user_statuses',
+             'user_verified'])
+        scrape_all()
+        print("tweets collected: " + str(len(list(csv.reader(open('all_twitter_data.csv')))) / 2))
+
+    else:
+        print('Enter "pol" or "all" for either political users or all users')
