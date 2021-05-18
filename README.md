@@ -3,8 +3,7 @@
 ## Instructions
 
 ### Setup
-- Clone the repository using "git clone " 
-- Create an file named "config.py" in and copy the content below
+- Create an file named "config.py" in and copy the content below - ensure this is in the root of the cloned repository 
 
       class TwitterKeys:
         consumer_key = 'ADD KEY HERE'
