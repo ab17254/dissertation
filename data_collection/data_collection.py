@@ -1,13 +1,16 @@
 #!/usr/bin/env python3.8
 import csv
 import sys
-import tweepy
-import snscrape.modules.twitter as sntwitter
 
-consumer_key = '9CtULzOKwtotSBbgmqqF5ZSE1'
-consumer_secret = 'SFDNiyOXgkPjQvETZXnQOWemCqrssBsZVe3ACYHF2AkA0giPNm'
-access_token = '711310452815503360-SfHfZuJSf5vOLBQQOdZGN7GNxaMTNS0'
-access_token_secret = 'ybUU3Sq5lWNMpZAyRgJZIPRW960PtwT2jFrfOAQIKEXp1'
+import snscrape.modules.twitter as sntwitter
+import tweepy
+
+from config import TwitterKeys
+
+consumer_key = TwitterKeys.consumer_key
+consumer_secret = TwitterKeys.consumer_secret
+access_token = TwitterKeys.access_token
+access_token_secret = TwitterKeys.access_token_secret
 
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
