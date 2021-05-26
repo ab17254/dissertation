@@ -22,6 +22,12 @@ user_df = pd.read_csv('ge2017_cand_data.csv')
 for name in user_df['screenName']:
     users.append(name)
 
+# with open('twitter_users.txt', 'r') as f:
+#     accounts = f.read().split('\n')
+#     for account in accounts:
+#         account = account[1:]
+#         users.append(account)
+#         f.close()
 
 '''
 Can only search 32 hashtags per query - have to create multiple queries and add those to the list below
@@ -78,17 +84,32 @@ def scrape_from_list():
                                   tweet.retweetCount, tweet.quoteCount,
                                   tweet.user.username, tweet.user.id, tweet.user.followersCount,
                                   tweet.user.friendsCount,
-                                  tweet.user.statusesCount, tweet.user.verified, tweet.url]
+                                  tweet.user.statusesCount, tweet.user.verified, tweet.user.url, tweet.url]
                     if tweet.mentionedUsers is not None:
-                        tweet_data.append(tweet.mentionedUsers)
-                    if tweet.retweetedTweet is not None:
-                        tweet_data.append(tweet.retweetedTweet)
+                        mentioned_user = []
+                        for j in range(len(tweet.mentionedUsers)):
+                            mentioned_user.append([tweet.mentionedUsers[j].username, tweet.mentionedUsers[j].id])
+                        tweet_data.append(mentioned_user)
+                    else:
+                        tweet_data.append(None)
                     if tweet.quotedTweet is not None:
                         tweet_data.append(tweet.quotedTweet.id)
                         tweet_data.append(tweet.quotedTweet.content.encode('utf-8'))
                         tweet_data.append(tweet.quotedTweet.user.username)
                         tweet_data.append(tweet.quotedTweet.user.id)
-                        tweet_data.append(tweet.quotedTweet.mentionedUsers)
+                        if tweet.quotedTweet.mentionedUsers is not None:
+                            quoted_users = []
+                            for k in range(len(tweet.quotedTweet.mentionedUsers)):
+                                quoted_users.append([tweet.quotedTweet.mentionedUsers[k].username,
+                                                     tweet.quotedTweet.mentionedUsers[k].id])
+                            tweet_data.append(quoted_users)
+                        else:
+                            tweet_data.append(None)
+                    else:
+                        tweet_data.append(None)
+                        tweet_data.append(None)
+                        tweet_data.append(None)
+                        tweet_data.append(None)
                     political_writer.writerow(tweet_data)
                 except UnicodeEncodeError:
                     pass
@@ -114,9 +135,9 @@ if __name__ == '__main__':
         political_writer = csv.writer(political_user_file)
         political_writer.writerow(
             ['tweet_date', 'tweet_content', 'tweet_id', 'tweet_likes', 'tweet_replies', 'tweet_retweets',
-             'tweet_quotes', 'tweet_mentionedUsers', 'user_username', 'user_id', 'user_followers', 'user_friends',
-             'user_statuses', 'user_verified', 'tweet_url', 'quotedTweet_id', 'quotedTweet_content',
-             'quotedTweet_mentionedUsers', 'quotedTweet_username', 'quotedTweet_userID', 'quotedTweet_url'])
+             'tweet_quotes', 'user_username', 'user_id', 'user_followers', 'user_friends',
+             'user_statuses', 'user_verified', 'user_url', 'tweet_url', 'mentioned_users', 'quotedTweet_id',
+             'quotedTweet_content', 'quotedTweet_username', 'quotedTweet_userID', 'quotedTweet_mentionedUsers'])
         scrape_from_list()
         print("tweets collected: " + str(len(list(csv.reader(open('political_twitter_data.csv')))) / 2))
 
