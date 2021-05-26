@@ -68,26 +68,42 @@ queries = [query_1, query_2]
 def scrape_from_list():
     for user in users:
         search = ' from:' + '"{}"'.format(user)
-        print(user)
+        # print(user)
         for query in queries:
             for i, tweet in enumerate(sntwitter.TwitterSearchScraper(query + search + 'since:2017-04-18 '
                                                                                       'until:2017-06-09').get_items()):
-                political_writer.writerow(
-                    [tweet.date, tweet.content.encode('utf-8'), tweet.id, tweet.likeCount, tweet.replyCount,
-                     tweet.retweetCount, tweet.quoteCount, tweet.user.username, tweet.user.id,
-                     tweet.user.followersCount, tweet.user.friendsCount, tweet.user.statusesCount,
-                     tweet.user.verified])
+                try:
+                    tweet_data = [tweet.date, tweet.content.encode('utf-8'), tweet.id, tweet.likeCount,
+                                  tweet.replyCount,
+                                  tweet.retweetCount, tweet.quoteCount,
+                                  tweet.user.username, tweet.user.id, tweet.user.followersCount,
+                                  tweet.user.friendsCount,
+                                  tweet.user.statusesCount, tweet.user.verified, tweet.url]
+                    if tweet.mentionedUsers is not None:
+                        tweet_data.append(tweet.mentionedUsers)
+                    if tweet.retweetedTweet is not None:
+                        tweet_data.append(tweet.retweetedTweet)
+                    if tweet.quotedTweet is not None:
+                        tweet_data.append(tweet.quotedTweet.id)
+                        tweet_data.append(tweet.quotedTweet.content.encode('utf-8'))
+                        tweet_data.append(tweet.quotedTweet.user.username)
+                        tweet_data.append(tweet.quotedTweet.user.id)
+                        tweet_data.append(tweet.quotedTweet.mentionedUsers)
+                    political_writer.writerow(tweet_data)
+                except UnicodeEncodeError:
+                    pass
 
 
 def scrape_all():
     for query in queries:
         for i, tweet in enumerate(sntwitter.TwitterSearchScraper(query + 'lang:en' + 'since:2017-04-18 '
                                                                                      'until:2017-06-09').get_items()):
-            all_writer.writerow(
+            '''all_writer.writerow(
                 [tweet.date, tweet.content.encode('utf-8'), tweet.id, tweet.likeCount, tweet.replyCount,
                  tweet.retweetCount, tweet.quoteCount, tweet.user.username, tweet.user.id,
                  tweet.user.followersCount, tweet.user.friendsCount, tweet.user.statusesCount,
-                 tweet.user.verified])
+                 tweet.user.verified])'''
+            all_writer.writerow([tweet.retweetedTweet])
 
 
 if __name__ == '__main__':
@@ -98,8 +114,9 @@ if __name__ == '__main__':
         political_writer = csv.writer(political_user_file)
         political_writer.writerow(
             ['tweet_date', 'tweet_content', 'tweet_id', 'tweet_likes', 'tweet_replies', 'tweet_retweets',
-             'tweet_quotes', 'user_username', 'user_id', 'user_followers', 'user_friends', 'user_statuses',
-             'user_verified'])
+             'tweet_quotes', 'tweet_mentionedUsers', 'user_username', 'user_id', 'user_followers', 'user_friends',
+             'user_statuses', 'user_verified', 'tweet_url', 'quotedTweet_id', 'quotedTweet_content',
+             'quotedTweet_mentionedUsers', 'quotedTweet_username', 'quotedTweet_userID', 'quotedTweet_url'])
         scrape_from_list()
         print("tweets collected: " + str(len(list(csv.reader(open('political_twitter_data.csv')))) / 2))
 
