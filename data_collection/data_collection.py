@@ -2,6 +2,7 @@
 import csv
 import sys
 
+import pandas as pd
 import snscrape.modules.twitter as sntwitter
 import tweepy
 
@@ -17,12 +18,11 @@ auth.set_access_token(access_token, access_token_secret)
 api = tweepy.API(auth, wait_on_rate_limit=True)
 
 users = []
-with open('twitter_users.txt', 'r') as f:
-    accounts = f.read().split('\n')
-    for account in accounts:
-        account = account[1:]
-        users.append(account)
-        f.close()
+user_df = pd.read_csv('ge2017_cand_data.csv')
+for name in user_df['screenName']:
+    users.append(name)
+
+
 '''
 Can only search 32 hashtags per query - have to create multiple queries and add those to the list below
 Election
@@ -68,7 +68,7 @@ queries = [query_1, query_2]
 def scrape_from_list():
     for user in users:
         search = ' from:' + '"{}"'.format(user)
-        # print(user)
+        print(user)
         for query in queries:
             for i, tweet in enumerate(sntwitter.TwitterSearchScraper(query + search + 'since:2017-04-18 '
                                                                                       'until:2017-06-09').get_items()):
