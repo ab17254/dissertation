@@ -19,6 +19,7 @@ api = tweepy.API(auth, wait_on_rate_limit=True)
 
 users = []
 user_df = pd.read_csv('ge2017_cand_data.csv')
+user_df = user_df.iloc[668:]
 for name in user_df['screenName']:
     users.append(name)
 
@@ -86,10 +87,7 @@ def scrape_from_list():
                                   tweet.user.friendsCount,
                                   tweet.user.statusesCount, tweet.user.verified, tweet.user.url, tweet.url]
                     if tweet.mentionedUsers is not None:
-                        mentioned_user = []
-                        for j in range(len(tweet.mentionedUsers)):
-                            mentioned_user.append([tweet.mentionedUsers[j].username, tweet.mentionedUsers[j].id])
-                        tweet_data.append(mentioned_user)
+                        tweet_data.append([tweet.mentionedUsers])
                     else:
                         tweet_data.append(None)
                     if tweet.quotedTweet is not None:
@@ -98,11 +96,7 @@ def scrape_from_list():
                         tweet_data.append(tweet.quotedTweet.user.username)
                         tweet_data.append(tweet.quotedTweet.user.id)
                         if tweet.quotedTweet.mentionedUsers is not None:
-                            quoted_users = []
-                            for k in range(len(tweet.quotedTweet.mentionedUsers)):
-                                quoted_users.append([tweet.quotedTweet.mentionedUsers[k].username,
-                                                     tweet.quotedTweet.mentionedUsers[k].id])
-                            tweet_data.append(quoted_users)
+                            tweet_data.append([tweet.quotedTweet.mentionedUsers])
                         else:
                             tweet_data.append(None)
                     else:
@@ -131,7 +125,7 @@ if __name__ == '__main__':
     type = sys.argv[1]
     if type == 'pol':
         political_user_file = open('political_twitter_data.csv',
-                                   'w')  # creates a file in which you want to store the data.
+                                   'a')  # creates a file in which you want to store the data.
         political_writer = csv.writer(political_user_file)
         political_writer.writerow(
             ['tweet_date', 'tweet_content', 'tweet_id', 'tweet_likes', 'tweet_replies', 'tweet_retweets',
