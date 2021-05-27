@@ -19,7 +19,7 @@ api = tweepy.API(auth, wait_on_rate_limit=True)
 
 users = []
 user_df = pd.read_csv('ge2017_cand_data.csv')
-user_df = user_df.iloc[668:]
+# user_df = user_df.iloc[668:]
 for name in user_df['screenName']:
     users.append(name)
 
@@ -72,6 +72,37 @@ query_2 = '#BBCQT OR #marr OR #Preston OR #r4today OR #NewsNight OR #BBC OR ' \
 queries = [query_1, query_2]
 
 
+def write_tweet(tweet):
+    try:
+        tweet_data = [tweet.date, tweet.content.encode('utf-8'), tweet.id, tweet.likeCount,
+                      tweet.replyCount,
+                      tweet.retweetCount, tweet.quoteCount,
+                      tweet.user.username, tweet.user.id, tweet.user.followersCount,
+                      tweet.user.friendsCount,
+                      tweet.user.statusesCount, tweet.user.verified, tweet.user.url, tweet.url]
+        if tweet.mentionedUsers is not None:
+            tweet_data.append([tweet.mentionedUsers])
+        else:
+            tweet_data.append(None)
+        if tweet.quotedTweet is not None:
+            tweet_data.append(tweet.quotedTweet.id)
+            tweet_data.append(tweet.quotedTweet.content.encode('utf-8'))
+            tweet_data.append(tweet.quotedTweet.user.username)
+            tweet_data.append(tweet.quotedTweet.user.id)
+            if tweet.quotedTweet.mentionedUsers is not None:
+                tweet_data.append([tweet.quotedTweet.mentionedUsers])
+            else:
+                tweet_data.append(None)
+        else:
+            tweet_data.append(None)
+            tweet_data.append(None)
+            tweet_data.append(None)
+            tweet_data.append(None)
+        return tweet_data
+    except UnicodeEncodeError:
+        pass
+
+
 def scrape_from_list():
     for user in users:
         search = ' from:' + '"{}"'.format(user)
@@ -79,31 +110,8 @@ def scrape_from_list():
         for query in queries:
             for i, tweet in enumerate(sntwitter.TwitterSearchScraper(query + search + 'since:2017-04-18 '
                                                                                       'until:2017-06-09').get_items()):
+                tweet_data = write_tweet(tweet)
                 try:
-                    tweet_data = [tweet.date, tweet.content.encode('utf-8'), tweet.id, tweet.likeCount,
-                                  tweet.replyCount,
-                                  tweet.retweetCount, tweet.quoteCount,
-                                  tweet.user.username, tweet.user.id, tweet.user.followersCount,
-                                  tweet.user.friendsCount,
-                                  tweet.user.statusesCount, tweet.user.verified, tweet.user.url, tweet.url]
-                    if tweet.mentionedUsers is not None:
-                        tweet_data.append([tweet.mentionedUsers])
-                    else:
-                        tweet_data.append(None)
-                    if tweet.quotedTweet is not None:
-                        tweet_data.append(tweet.quotedTweet.id)
-                        tweet_data.append(tweet.quotedTweet.content.encode('utf-8'))
-                        tweet_data.append(tweet.quotedTweet.user.username)
-                        tweet_data.append(tweet.quotedTweet.user.id)
-                        if tweet.quotedTweet.mentionedUsers is not None:
-                            tweet_data.append([tweet.quotedTweet.mentionedUsers])
-                        else:
-                            tweet_data.append(None)
-                    else:
-                        tweet_data.append(None)
-                        tweet_data.append(None)
-                        tweet_data.append(None)
-                        tweet_data.append(None)
                     political_writer.writerow(tweet_data)
                 except UnicodeEncodeError:
                     pass
@@ -113,12 +121,11 @@ def scrape_all():
     for query in queries:
         for i, tweet in enumerate(sntwitter.TwitterSearchScraper(query + 'lang:en' + 'since:2017-04-18 '
                                                                                      'until:2017-06-09').get_items()):
-            '''all_writer.writerow(
-                [tweet.date, tweet.content.encode('utf-8'), tweet.id, tweet.likeCount, tweet.replyCount,
-                 tweet.retweetCount, tweet.quoteCount, tweet.user.username, tweet.user.id,
-                 tweet.user.followersCount, tweet.user.friendsCount, tweet.user.statusesCount,
-                 tweet.user.verified])'''
-            all_writer.writerow([tweet.retweetedTweet])
+            tweet_data = write_tweet(tweet)
+            try:
+                all_writer.writerow(tweet_data)
+            except UnicodeEncodeError:
+                pass
 
 
 if __name__ == '__main__':
@@ -140,8 +147,9 @@ if __name__ == '__main__':
         all_writer = csv.writer(all_user_file)
         all_writer.writerow(
             ['tweet_date', 'tweet_content', 'tweet_id', 'tweet_likes', 'tweet_replies', 'tweet_retweets',
-             'tweet_quotes', 'user_username', 'user_id', 'user_followers', 'user_friends', 'user_statuses',
-             'user_verified'])
+             'tweet_quotes', 'user_username', 'user_id', 'user_followers', 'user_friends',
+             'user_statuses', 'user_verified', 'user_url', 'tweet_url', 'mentioned_users', 'quotedTweet_id',
+             'quotedTweet_content', 'quotedTweet_username', 'quotedTweet_userID', 'quotedTweet_mentionedUsers'])
         scrape_all()
         print("tweets collected: " + str(len(list(csv.reader(open('all_twitter_data.csv')))) / 2))
 
