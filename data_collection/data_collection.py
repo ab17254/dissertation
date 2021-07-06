@@ -48,7 +48,7 @@ Register to Vote
 Scottish independence referendum 
 UKIP
 Policies
-'''
+
 
 query_1 = '#GE2017 OR #GE17 OR #GeneralElection OR #GeneralElection2017 OR #Election2017 OR ' \
           + '#VoteLabour OR #Labour OR #ImVotingLabour OR ' \
@@ -68,6 +68,21 @@ query_2 = '#BBCQT OR #marr OR #Preston OR #r4today OR #NewsNight OR #BBC OR ' \
           + '#Manchester OR #Londonattacks OR #LondonBridge OR #London OR ' \
           + '#UKIP OR ' \
           + '#Socialcare'
+'''
+
+query_1 = '#GE2019 OR #GE19 OR #GeneralElection OR #GeneralElection2019 OR #Election2019 OR ' \
+          + '#VoteLabour OR #Labour OR #ImVotingLabour OR ' \
+          + '#Tories OR #Tory OR #conservatives OR #VoteConservative OR #conservatives OR' \
+          + '#JC4PM OR #Corbyn OR #JeremyCorbyn OR' \
+          + '#borisjohnson OR #Brexit OR' \
+          + '#NHS OR #VoteNHS OR #SaveOurNHS OR ' \
+          + '#BBCDebate OR #BattleForNumber10 OR #ITVDebate OR #LeadersDebate'
+
+query_2 = '#BBCQT OR #marr OR #Preston OR #r4today OR #NewsNight OR #BBC OR ' \
+          + '#ForTheMany OR #ForTheManyNotTheFew OR ' \
+          + '#voteSNP OR #SNP' \
+          + '#ToryManifesto OR #LabourManifesto OR ' \
+          + '#RegistertoVote OR #Vote OR #WhyVote OR #Register2Vote OR ' \
 
 queries = [query_1, query_2]
 
@@ -119,8 +134,8 @@ def scrape_from_list():
 
 def scrape_all():
     for query in queries:
-        for i, tweet in enumerate(sntwitter.TwitterSearchScraper(query + 'lang:en' + 'since:2017-04-18 '
-                                                                                     'until:2017-06-09').get_items()):
+        for i, tweet in enumerate(sntwitter.TwitterSearchScraper(query + 'lang:en' + 'since:2019-11-06 '
+                                                                                     'until:2019-12-13').get_items()):
             tweet_data = write_tweet(tweet)
             try:
                 all_writer.writerow(tweet_data)
@@ -143,7 +158,7 @@ if __name__ == '__main__':
         print("tweets collected: " + str(len(list(csv.reader(open('political_twitter_data.csv')))) / 2))
 
     elif type == 'all':
-        all_user_file = open('all_twitter_data.csv', 'w')
+        all_user_file = open('2019_all_twitter_data.csv', 'w')
         all_writer = csv.writer(all_user_file)
         all_writer.writerow(
             ['tweet_date', 'tweet_content', 'tweet_id', 'tweet_likes', 'tweet_replies', 'tweet_retweets',
