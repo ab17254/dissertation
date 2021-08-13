@@ -1,4 +1,5 @@
 #!/usr/bin/env python3.8
+# Import libaries
 import csv
 import sys
 
@@ -8,6 +9,7 @@ import tweepy
 
 from config import TwitterKeys
 
+# Twitter authorization and connection to API
 consumer_key = TwitterKeys.consumer_key
 consumer_secret = TwitterKeys.consumer_secret
 access_token = TwitterKeys.access_token
@@ -17,57 +19,15 @@ auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
 api = tweepy.API(auth, wait_on_rate_limit=True)
 
+# Creates user list for when scraping certain users
 users = []
 user_df = pd.read_csv('ge2017_cand_data.csv')
-# user_df = user_df.iloc[668:]
 for name in user_df['screenName']:
     users.append(name)
 
-# with open('twitter_users.txt', 'r') as f:
-#     accounts = f.read().split('\n')
-#     for account in accounts:
-#         account = account[1:]
-#         users.append(account)
-#         f.close()
-
+# Lists of hashtags to be collected
 '''
 Can only search 32 hashtags per query - have to create multiple queries and add those to the list below
-Election
-Labour
-Tories
-Corbyn
-May
-Brexit
-NHS
-Debates
-TV/Radio
-For the Many
-SNP
-Manifesto Launch
-Register to Vote
-Scottish independence referendum 
-UKIP
-Policies
-
-
-query_1 = '#GE2017 OR #GE17 OR #GeneralElection OR #GeneralElection2017 OR #Election2017 OR ' \
-          + '#VoteLabour OR #Labour OR #ImVotingLabour OR ' \
-          + '#Tories OR #Tory OR #conservatives OR #VoteConservative OR #conservative OR ' \
-          + '#JC4PM OR #Corbyn OR #JeremyCorbyn OR ' \
-          + '#May OR #TheresaMay OR ' \
-          + '#Brexit OR ' \
-          + '#NHS OR #VoteNHS OR #SaveOurNHS OR ' \
-          + '#BBCDebate OR #BattleForNumber10 OR #ITVDebate OR #LeadersDebate OR #MayvCorbyn'
-
-query_2 = '#BBCQT OR #marr OR #Preston OR #r4today OR #NewsNight OR #BBC OR ' \
-          + '#ForTheMany OR #ForTheManyNotTheFew OR ' \
-          + '#voteSNP OR #SNP' \
-          + '#ToryManifesto OR #LabourManifesto OR ' \
-          + '#RegistertoVote OR #Vote OR #WhyVote OR #Register2Vote OR ' \
-          + '#ScotRef OR #indyref2 OR #Scotland OR ' \
-          + '#Manchester OR #Londonattacks OR #LondonBridge OR #London OR ' \
-          + '#UKIP OR ' \
-          + '#Socialcare'
 '''
 
 query_1 = '#GE2019 OR #GE19 OR #GeneralElection OR #GeneralElection2019 OR #Election2019 OR ' \
@@ -82,12 +42,18 @@ query_2 = '#BBCQT OR #marr OR #Preston OR #r4today OR #NewsNight OR #BBC OR ' \
           + '#ForTheMany OR #ForTheManyNotTheFew OR ' \
           + '#voteSNP OR #SNP' \
           + '#ToryManifesto OR #LabourManifesto OR ' \
-          + '#RegistertoVote OR #Vote OR #WhyVote OR #Register2Vote OR ' \
+          + '#RegistertoVote OR #Vote OR #WhyVote OR #Register2Vote OR '
 
+# Merges the two queries so a larger search can be performed
 queries = [query_1, query_2]
 
 
 def write_tweet(tweet):
+    """
+    Function to form tweet data to an list, for the line to be written in the csv file. Called in scrape_all and scrape_from_list
+    :param tweet: (object)
+    :return tweet_data (list): list of values from tweet
+    """
     try:
         tweet_data = [tweet.date, tweet.content.encode('utf-8'), tweet.id, tweet.likeCount,
                       tweet.replyCount,
@@ -119,6 +85,9 @@ def write_tweet(tweet):
 
 
 def scrape_from_list():
+    """
+    Calls sntwitter library to scrape tweets using the formed query. Only scrapes users whose username appear in user list
+    """
     for user in users:
         search = ' from:' + '"{}"'.format(user)
         print(user)
@@ -133,6 +102,9 @@ def scrape_from_list():
 
 
 def scrape_all():
+    """
+    Calls sntwitter library to scrape tweets using the formed query.
+    """
     for query in queries:
         for i, tweet in enumerate(sntwitter.TwitterSearchScraper(query + 'lang:en' + 'since:2019-11-06 '
                                                                                      'until:2019-12-13').get_items()):
@@ -145,16 +117,19 @@ def scrape_all():
 
 if __name__ == '__main__':
     type = sys.argv[1]
+    # Parameter either 'pol' or 'all'. Pol will call scrape_from_list(). all will call scrape_all()
     if type == 'pol':
         political_user_file = open('political_twitter_data.csv',
                                    'a')  # creates a file in which you want to store the data.
         political_writer = csv.writer(political_user_file)
+        # Header row
         political_writer.writerow(
             ['tweet_date', 'tweet_content', 'tweet_id', 'tweet_likes', 'tweet_replies', 'tweet_retweets',
              'tweet_quotes', 'user_username', 'user_id', 'user_followers', 'user_friends',
              'user_statuses', 'user_verified', 'user_url', 'tweet_url', 'mentioned_users', 'quotedTweet_id',
              'quotedTweet_content', 'quotedTweet_username', 'quotedTweet_userID', 'quotedTweet_mentionedUsers'])
         scrape_from_list()
+        # Prints the total number of tweets collected - divided by 2 due to newline in file
         print("tweets collected: " + str(len(list(csv.reader(open('political_twitter_data.csv')))) / 2))
 
     elif type == 'all':
