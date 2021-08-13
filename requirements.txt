@@ -1,0 +1,4 @@
+tweepy==3.10.0
+botometer==1.6
+pandas==1.1.3
+snscrape==0.3.5.dev104+g97c8cae
