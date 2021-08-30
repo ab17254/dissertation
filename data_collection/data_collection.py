@@ -19,11 +19,11 @@ auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
 api = tweepy.API(auth, wait_on_rate_limit=True)
 
-# Creates user list for when scraping certain users
-users = []
-user_df = pd.read_csv('ge2017_cand_data.csv')
-for name in user_df['screenName']:
-    users.append(name)
+# Creates user list for when scraping certain users - Uncomment and add file if needed
+# users = []
+# user_df = pd.read_csv('ge2017_cand_data.csv')
+# for name in user_df['screenName']:
+#     users.append(name)
 
 # Lists of hashtags to be collected
 '''
@@ -83,7 +83,7 @@ def write_tweet(tweet):
     except UnicodeEncodeError:
         pass
 
-
+''' Used in scraping specific users
 def scrape_from_list():
     """
     Calls sntwitter library to scrape tweets using the formed query. Only scrapes users whose username appear in user list
@@ -99,7 +99,7 @@ def scrape_from_list():
                     political_writer.writerow(tweet_data)
                 except UnicodeEncodeError:
                     pass
-
+'''
 
 def scrape_all():
     """
